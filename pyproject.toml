@@ -7,3 +7,14 @@ requires-python = ">=3.9"
 dependencies = [
     "tqdm>=4.67.1",
 ]
+
+[dependency-groups]
+dev = [
+    "bump-my-version>=1.2.0",
+    "towncrier>=24.8.0",
+]
+
+[tool.towncrier]
+directory = "changes"
+package = "tabbyset"
+name = "TabbySet"

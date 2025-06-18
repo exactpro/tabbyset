@@ -45,41 +45,6 @@ for file in files:
 TabbySet provides a set of instruments with the same interface as the ones already present in the business processes,
 but with tested functionality under the hood and/or faster.
 
-### TestManagement
-
-While the `TestManagement` class can be easily replaced with readers and writers from tabbyset, 
-you can utilize the `TestManagement` class using those under the hood.
-
-```python
-# Old import
-from ex_model_input_generator.test_management import TestManagement
-# New import
-from tabbyset.adapters import TestManagement
-```
-
-### Select subset
-
-TabbySet provides SQLite-based implementation of the select subset pipeline. 
-It is many times faster and requires much less resources than the old implementation.
-
-```python
-# Old import
-from ex_subset_selector.main import annotation_traces_vs_test_case
-# New import
-from tabbyset.scripts.select_subset_sqlite import annotation_traces_vs_test_case
-```
-
-### Better approval tests reporting
-
-With the new `RegressionTesting` class, you can get a more detailed report on the differences between the expected and actual results.
-
-```python
-# Old import
-from ex_scenario_executor_gx.comparator import RegressionTesting
-# New import
-from tabbyset.testing import RegressionTesting
-```
-
 ## Testing
 
 TabbySet provides utilities for testing compatible with the `unittest` module.

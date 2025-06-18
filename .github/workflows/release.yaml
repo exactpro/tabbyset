@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write  # for trusted PyPI publishing with uv
+
+jobs:
+  release:
+    name: Version & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build changelog
+        run: |
+          towncrier build --yes
+          git add CHANGELOG.md
+          git commit -m "docs(changelog): update changelog [skip ci]"
+
+      - name: Bump version (patch example)
+        run: |
+          bump-my-version patch
+
+      - name: Push changes and tag
+        run: git push --follow-tags
+
+      - name: Build package
+        run: uv build
+
+      - name: Publish to PyPI
+        run: uv publish --yes
+        env:
+          UV_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}

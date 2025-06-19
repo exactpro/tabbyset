@@ -2,6 +2,15 @@
 
 TabbySet is a kit of simple tools for working with all business processes around the exactpro model.
 
+## Installation
+
+You can install TabbySet using pip:
+
+```bash
+pip install tabbyset
+```
+
+
 ## Usage
 
 In general, when you want to write a new script, you should start with the following code:

@@ -2,11 +2,9 @@ name: release
 
 on:
   push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
-      - "[0-9]+.[0-9]+.[0-9]+a[0-9]+"
-      - "[0-9]+.[0-9]+.[0-9]+b[0-9]+"
-      - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
+    branches:
+      - master
+      - pipeline_config
 
 env:
   PACKAGE_NAME: "tabbyset"
@@ -16,29 +14,19 @@ jobs:
   details:
     runs-on: ubuntu-latest
     outputs:
-      new_version: ${{ steps.release.outputs.new_version }}
-      suffix: ${{ steps.release.outputs.suffix }}
-      tag_name: ${{ steps.release.outputs.tag_name }}
+      new_version: ${{ steps.new_version.outputs.new_version }}
     steps:
       - uses: actions/checkout@v2
 
-      - name: Extract tag and Details
-        id: release
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Extract new version
+        id: new_version
         run: |
-          if [ "${{ github.ref_type }}" = "tag" ]; then
-            TAG_NAME=${GITHUB_REF#refs/tags/}
-            NEW_VERSION=$(echo $TAG_NAME | awk -F'-' '{print $1}')
-            SUFFIX=$(echo $TAG_NAME | grep -oP '[a-z]+[0-9]+' || echo "")
-            echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-            echo "suffix=$SUFFIX" >> "$GITHUB_OUTPUT"
-            echo "tag_name=$TAG_NAME" >> "$GITHUB_OUTPUT"
-            echo "Version is $NEW_VERSION"
-            echo "Suffix is $SUFFIX"
-            echo "Tag name is $TAG_NAME"
-          else
-            echo "No tag found"
-            exit 1
-          fi
+          OLD_VERSION=$(uv version --short)
+          echo "old_version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Old version is $OLD_VERSION"
 
   check_pypi:
     needs: details
@@ -66,8 +54,28 @@ jobs:
             echo "The new version $NEW_VERSION is greater than the latest version $LATEST_VERSION on PyPI."
           fi
 
-  setup_and_build:
+  push_tag:
     needs: [details, check_pypi]
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.tag_name.outputs.tag_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Push version tag
+        uses: actions-ecosystem/action-push-tag@v1
+        with:
+          tag: v${{ steps.details.outputs.new_version }}
+
+      - name: Export tag name
+        id: tag_name
+        run: |
+          echo "tag_name=v${{ steps.details.outputs.new_version }}" >> $GITHUB_ENV
+
+
+  setup_and_build:
+    needs: [details, check_pypi, push_tag]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -79,9 +87,6 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
-
-      - name: Set project version with uv
-        run: uv version ${{ needs.details.outputs.new_version }}
 
       - name: Install dependencies
         run: uv sync --no-dev
@@ -115,7 +120,7 @@ jobs:
 
   github_release:
     name: Create GitHub Release
-    needs: [setup_and_build, details]
+    needs: [setup_and_build, details, push_tag]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -136,4 +141,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create ${{ needs.details.outputs.tag_name }} dist/* --title ${{ needs.details.outputs.tag_name }} --generate-notes
+          gh release create ${{ needs.push_tag.outputs.tag_name }} dist/* --title ${{ needs.push_tag.outputs.tag_name }} --generate-notes

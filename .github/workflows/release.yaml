@@ -24,9 +24,9 @@ jobs:
       - name: Extract new version
         id: new_version
         run: |
-          OLD_VERSION=$(uv version --short)
-          echo "old_version=$OLD_VERSION" >> "$GITHUB_OUTPUT"
-          echo "Old version is $OLD_VERSION"
+          NEW_VERSION=$(uv version --short)
+          echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "New version is $NEW_VERSION"
 
   check_pypi:
     needs: details

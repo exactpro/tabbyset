@@ -31,6 +31,8 @@ jobs:
   check_pypi:
     needs: details
     runs-on: ubuntu-latest
+    outputs:
+      is_newer: ${{ steps.compare.outputs.is_newer }}
     steps:
       - name: Fetch information from PyPI
         run: |
@@ -44,18 +46,21 @@ jobs:
           echo "latest_previous_version=$latest_previous_version" >> $GITHUB_ENV
 
       - name: Compare versions and exit if not newer
+        id: compare
         run: |
           NEW_VERSION=${{ needs.details.outputs.new_version }}
           LATEST_VERSION=$latest_previous_version
           if [ "$(printf '%s\n' "$LATEST_VERSION" "$NEW_VERSION" | sort -rV | head -n 1)" != "$NEW_VERSION" ] || [ "$NEW_VERSION" == "$LATEST_VERSION" ]; then
             echo "The new version $NEW_VERSION is not greater than the latest version $LATEST_VERSION on PyPI."
-            exit 1
+            echo "is_newer=false" >> $GITHUB_OUTPUT
           else
             echo "The new version $NEW_VERSION is greater than the latest version $LATEST_VERSION on PyPI."
+            echo "is_newer=true" >> $GITHUB_OUTPUT
           fi
 
   push_tag:
     needs: [details, check_pypi]
+    if: needs.check_pypi.outputs.is_newer == 'true'
     runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.push_tag.outputs.tag_name }}
@@ -76,6 +81,7 @@ jobs:
 
   setup_and_build:
     needs: [details, check_pypi, push_tag]
+    if: needs.check_pypi.outputs.is_newer == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -102,7 +108,8 @@ jobs:
 
   pypi_publish:
     name: Upload release to PyPI
-    needs: [setup_and_build, details]
+    needs: [setup_and_build, details, check_pypi]
+    if: needs.check_pypi.outputs.is_newer == 'true'
     runs-on: ubuntu-latest
     environment:
       name: release
@@ -120,7 +127,8 @@ jobs:
 
   github_release:
     name: Create GitHub Release
-    needs: [setup_and_build, details, push_tag]
+    needs: [setup_and_build, details, check_pypi, push_tag]
+    if: needs.check_pypi.outputs.is_newer == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write

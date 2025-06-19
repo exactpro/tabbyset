@@ -94,7 +94,10 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
-        run: uv sync --no-dev
+        run: uv sync
+
+      - name: Run tests
+        run: uv run -m unittest discover tests
 
       - name: Build source and wheel distribution
         run: uv build

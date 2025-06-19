@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - pipeline_config
 
 env:
   PACKAGE_NAME: "tabbyset"

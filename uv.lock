@@ -91,7 +91,7 @@ wheels = [
 
 [[package]]
 name = "tabbyset"
-version = "0.0.2"
+version = "1.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "tqdm" },

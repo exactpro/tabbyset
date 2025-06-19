@@ -33,7 +33,7 @@ uv run -m coverage report
 
 ## How to release a new version
 
-Release pipeline runs every push to the `main` branch. It checks if version in `pyproject.toml` is greater than the 
+Release pipeline runs every push to the `master` branch. It checks if version in `pyproject.toml` is greater than the 
 last release version. If it is, it will build a new release and upload it to PyPI and reflect it in a GitHub Release.
 
 Version should be updated using `uv version` command. We strongly encourage using `--bump` option, which follows 

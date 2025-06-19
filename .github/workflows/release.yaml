@@ -58,12 +58,13 @@ jobs:
     needs: [details, check_pypi]
     runs-on: ubuntu-latest
     outputs:
-      tag_name: ${{ steps.tag_name.outputs.tag_name }}
+      tag_name: ${{ steps.push_tag.outputs.tag_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
       - name: Push version tag
+        id: push_tag
         run: |
           tag=v${{ needs.details.outputs.new_version }}
           echo "tag_name=${tag}" >> $GITHUB_OUTPUT

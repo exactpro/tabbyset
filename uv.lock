@@ -91,7 +91,7 @@ wheels = [
 
 [[package]]
 name = "tabbyset"
-version = "1.0.0"
+version = "1.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "tqdm" },
@@ -103,7 +103,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "tqdm", specifier = ">=4.67.1" }]
+requires-dist = [{ name = "tqdm", specifier = ">=4.0.0" }]
 
 [package.metadata.requires-dev]
 dev = [{ name = "coverage", specifier = ">=7.9.1" }]

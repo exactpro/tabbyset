@@ -3,6 +3,8 @@ name = "tabbyset"
 version = "1.0.1"
 description = "Exactpro basic tooling for working with tests proprietary files"
 readme = "README.md"
+license = {text = "Apache-2.0"}
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dependencies = [
     "tqdm>=4.0.0",

@@ -1,6 +1,6 @@
 [project]
 name = "tabbyset"
-version = "1.0.1"
+version = "1.0.2"
 description = "Exactpro basic tooling for working with tests proprietary files"
 readme = "README.md"
 license = {text = "Apache-2.0"}
